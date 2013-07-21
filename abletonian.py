@@ -39,8 +39,7 @@ class Scene():
             self.callbacks.append(pyo.TrigFunc(self.trig, c.play))
 
     def stop(self):
-        for cb in self.clips:
-            del cb
+        self.callbacks = []
             
 
 class Abletonian():
@@ -56,3 +55,4 @@ class Abletonian():
 
     def sceneStop(self, sceneIndex):
         self.scenes[sceneIndex].stop()
+

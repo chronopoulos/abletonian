@@ -42,8 +42,10 @@ class SceneButton(ToggleButton):
     sceneIndex = NumericProperty()
     def on_press(self):
         if self.state=='down':
+            print 'Down: ', self.sceneIndex
             abletonian.sceneGo(self.sceneIndex)
         else:
+            print 'Up: ', self.sceneIndex
             abletonian.sceneStop(self.sceneIndex)
 
 
@@ -66,4 +68,6 @@ class KivyApp(App):
 
 
 if __name__ == '__main__':
+
     KivyApp().run()
+
