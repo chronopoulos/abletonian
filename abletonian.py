@@ -19,24 +19,25 @@ class Clip():
 
 class Scene():
 
-    def __init__(self):
-        self.clips = []
+    def __init__(self, ntracks):
+        self.clips = [None]*ntracks
         self.callbacks = []
 
     def addMasterClip(self, filename):
         self.master = Clip(filename)
         self.trig = self.master.player['trig']
-        self.clips.append(self.master)
+        self.clips[0] = self.master
 
-    def addClip(self, filename):
+    def addClip(self, filename, trackIndex):
         clip = Clip(filename)
         #clip.followMaster(self.master)
-        self.clips.append(clip)
+        self.clips[trackIndex] = clip
 
     def go(self):
         for c in self.clips:
-            c.play()
-            self.callbacks.append(pyo.TrigFunc(self.trig, c.play))
+            if c:
+                c.play()
+                self.callbacks.append(pyo.TrigFunc(self.trig, c.play))
 
     def stop(self):
         self.callbacks = []
@@ -44,15 +45,27 @@ class Scene():
 
 class Abletonian():
 
-    def __init__(self):
-        self.scenes=[]
-
-    def addScene(self, scene):
-        self.scenes.append(scene)
+    def __init__(self, ntracks, nscenes):
+        self.scenes=[Scene(ntracks) for i in range(nscenes)]
+        self.current = None
 
     def sceneGo(self, sceneIndex):
-        self.scenes[sceneIndex].go()
+        self.nextScene = self.scenes[sceneIndex]
+        if self.current:
+            self.current.stop()
+            self.switchCallback = pyo.TrigFunc(self.current.master.player['trig'],self.switch)
+        else:
+            self.switch()
+
+    def switch(self):
+        self.nextScene.go()
+        self.current = self.nextScene
+        self.nextScene = None
 
     def sceneStop(self, sceneIndex):
         self.scenes[sceneIndex].stop()
+        self.current = None
+
+    def addScene(self, scene, sceneIndex):
+        self.scenes[sceneIndex] = scene
 
