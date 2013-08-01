@@ -1,4 +1,4 @@
-import pyo
+import pyo, sys
 from abletonian import Abletonian, Scene, Clip
 
 from kivy.app import App
@@ -30,10 +30,10 @@ abletonian.scenes[0].addClip(loopdir+'120bpm_16b_pentatonicbells.wav', 3)
 
 #################################
 
-class GridButton(Button):
+class ClipButton(Button):
 
     def __init__(self, trackIndex, sceneIndex):
-        super(GridButton, self).__init__(text='load')
+        super(ClipButton, self).__init__(text='load')
         self.trackIndex = trackIndex
         self.sceneIndex = sceneIndex
         self.ti = TextInput(text='/home/chrono/music/samples/drum loops/', size_hint=(0.8,0.8), pos_hint={'x':0.1, 'y':0.1}, multiline=False)
@@ -53,41 +53,74 @@ class GridButton(Button):
         else:
             abletonian.scenes[self.sceneIndex].addClip(textinput.text, self.trackIndex)
 
+class AddSceneButton(Button):
+
+    def __init__(self, size_hint=(1.,1.), pos_hint={'x':0.,'y':0.}):
+        super(AddSceneButton, self).__init__(text='Add\nScene', size_hint=size_hint, pos_hint=pos_hint)
+
 
 class SceneButton(ToggleButton):
 
-    def __init__(self, sceneIndex):
+    def __init__(self, sceneIndex, size_hint=(1.,1.), pos_hint={'x':0.,'y':0.}):
         self.sceneIndex = sceneIndex
-        super(SceneButton, self).__init__(text='Scene '+str(self.sceneIndex), group='Scenes')
+        super(SceneButton, self).__init__(text='Scene '+str(self.sceneIndex), group='Scenes', size_hint=size_hint, pos_hint=pos_hint)
 
     def on_press(self):
         if self.state=='down':
-            print 'Down: ', self.sceneIndex
+            app.messageBox.text='Playing Scene '+str(self.sceneIndex)
             abletonian.sceneGo(self.sceneIndex)
         else:
             print 'Up: ', self.sceneIndex
             abletonian.sceneStop(self.sceneIndex)
 
+class SceneRow(FloatLayout):
+
+    def __init__(self, sceneIndex, ntracks):
+        super(SceneRow, self).__init__()
+        super(SceneRow, self).add_widget(SceneButton(sceneIndex, size_hint=(0.19,1.0)))
+        trackBar = BoxLayout(orientation='horizontal', size_hint=(0.79,1.0), pos_hint={'x':0.21,'y':0.})
+        for i in range(ntracks):
+            trackBar.add_widget(ClipButton(trackIndex=i, sceneIndex=sceneIndex))
+        super(SceneRow, self).add_widget(trackBar)
+
+
 
 class AbletonianApp(App):
 
     def build(self):
-        ntracks = 4
-        nclips = 4
-        root = FloatLayout()
-        grid = GridLayout(rows=nclips, cols=ntracks, size_hint=(0.79,1.0))
-        for j in range(nclips):
-            for i in range(ntracks):
-                grid.add_widget(GridButton(trackIndex=i, sceneIndex=j))
-        sidebar = BoxLayout(orientation='vertical', size_hint=(0.19,1.0), pos_hint={'x':0.81, 'y':0.0})
-        for j in range(nclips):
-            sidebar.add_widget(SceneButton(sceneIndex=j))
-        root.add_widget(grid)
-        root.add_widget(sidebar)
-        return root
+
+        self.ntracks = 4
+        self.nscenes = 4
+
+        ds = 0.02
+
+        gridWidth = 0.8
+        gridHeight = 0.8
+
+        self.root = FloatLayout()
+
+        self.main = FloatLayout(size_hint=(1-ds*2,1-ds*2), pos_hint={'x':ds, 'y':ds})
+
+        self.grid = BoxLayout(orientation='vertical', size_hint=(gridWidth-ds/2, gridHeight-ds/2), pos_hint = {'x':0.0,'y':1-gridHeight+ds/2})
+        for i in range(self.nscenes):
+            self.grid.add_widget(SceneRow(i, self.ntracks))
+
+        self.main.add_widget(self.grid)
+
+        self.bottomBar = FloatLayout(size_hint=(gridWidth,1-gridHeight-ds/2), pos_hint={'x':0., 'y':0.})
+        self.bottomBar.add_widget(AddSceneButton(size_hint=(0.19,1.)))
+        self.messageBox = Label(text='Message Box', size_hint=(0.79,1.), pos_hint={'x':0.21, 'y':0.})
+        self.bottomBar.add_widget(self.messageBox)
+
+        self.main.add_widget(self.bottomBar)
+
+        self.root.add_widget(self.main)
+
+        return self.root
 
 
 if __name__ == '__main__':
 
-    AbletonianApp().run()
+    app = AbletonianApp()
+    app.run()
 
