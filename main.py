@@ -53,11 +53,31 @@ class ClipButton(Button):
         else:
             abletonian.scenes[self.sceneIndex].addClip(textinput.text, self.trackIndex)
 
+
 class AddSceneButton(Button):
 
     def __init__(self, size_hint=(1.,1.), pos_hint={'x':0.,'y':0.}):
         super(AddSceneButton, self).__init__(text='Add\nScene', size_hint=size_hint, pos_hint=pos_hint)
 
+    def on_press(self):
+        newSceneRow = SceneRow(app.nscenes, app.ntracks)
+        abletonian.addNewScene()
+        app.scenerows.append(newSceneRow)
+        app.grid.add_widget(newSceneRow)
+        app.nscenes = len(app.scenerows)
+        app.messageBox.text = 'Added New Scene'
+
+
+class AddTrackButton(Button):
+
+    def __init__(self, size_hint=(1.,1.), pos_hint={'x':0.,'y':0.}):
+        super(AddTrackButton, self).__init__(text='Add\nTrack', size_hint=size_hint, pos_hint=pos_hint)
+
+    def on_press(self):
+        for scenerow in app.scenerows:
+            scenerow.addTrack()
+        app.ntracks += 1
+        app.messageBox.text = 'Added New Track'
 
 class SceneButton(ToggleButton):
 
@@ -73,16 +93,22 @@ class SceneButton(ToggleButton):
             print 'Up: ', self.sceneIndex
             abletonian.sceneStop(self.sceneIndex)
 
+
 class SceneRow(FloatLayout):
 
     def __init__(self, sceneIndex, ntracks):
+        self.sceneIndex = sceneIndex
+        self.ntracks = ntracks
         super(SceneRow, self).__init__()
         super(SceneRow, self).add_widget(SceneButton(sceneIndex, size_hint=(0.19,1.0)))
-        trackBar = BoxLayout(orientation='horizontal', size_hint=(0.79,1.0), pos_hint={'x':0.21,'y':0.})
-        for i in range(ntracks):
-            trackBar.add_widget(ClipButton(trackIndex=i, sceneIndex=sceneIndex))
-        super(SceneRow, self).add_widget(trackBar)
+        self.trackBar = BoxLayout(orientation='horizontal', size_hint=(0.79,1.0), pos_hint={'x':0.21,'y':0.})
+        for i in range(self.ntracks):
+            self.trackBar.add_widget(ClipButton(trackIndex=i, sceneIndex=self.sceneIndex))
+        super(SceneRow, self).add_widget(self.trackBar)
 
+    def addTrack(self):
+        self.ntracks += 1
+        self.trackBar.add_widget(ClipButton(trackIndex=self.ntracks-1, sceneIndex=self.sceneIndex))
 
 
 class AbletonianApp(App):
@@ -94,16 +120,20 @@ class AbletonianApp(App):
 
         ds = 0.02
 
-        gridWidth = 0.8
+        gridWidth = 0.9
         gridHeight = 0.8
 
         self.root = FloatLayout()
 
         self.main = FloatLayout(size_hint=(1-ds*2,1-ds*2), pos_hint={'x':ds, 'y':ds})
 
-        self.grid = BoxLayout(orientation='vertical', size_hint=(gridWidth-ds/2, gridHeight-ds/2), pos_hint = {'x':0.0,'y':1-gridHeight+ds/2})
+        self.scenerows = []
         for i in range(self.nscenes):
-            self.grid.add_widget(SceneRow(i, self.ntracks))
+            self.scenerows.append(SceneRow(i, self.ntracks))
+
+        self.grid = BoxLayout(orientation='vertical', size_hint=(gridWidth-ds/2, gridHeight-ds/2), pos_hint = {'x':0.0,'y':1-gridHeight+ds/2})
+        for scenerow in self.scenerows:
+            self.grid.add_widget(scenerow)
 
         self.main.add_widget(self.grid)
 
@@ -113,6 +143,8 @@ class AbletonianApp(App):
         self.bottomBar.add_widget(self.messageBox)
 
         self.main.add_widget(self.bottomBar)
+
+        self.main.add_widget(AddTrackButton(size_hint=(1-gridWidth-ds,gridHeight-ds/2), pos_hint={'x':gridWidth+ds, 'y':1-gridHeight+ds/2}))
 
         self.root.add_widget(self.main)
 

@@ -46,6 +46,8 @@ class Scene():
 class Abletonian():
 
     def __init__(self, ntracks, nscenes):
+        self.ntracks = ntracks
+        self.nscenes = nscenes
         self.scenes=[Scene(ntracks) for i in range(nscenes)]
         self.current = None
 
@@ -68,4 +70,7 @@ class Abletonian():
 
     def addScene(self, scene, sceneIndex):
         self.scenes[sceneIndex] = scene
+
+    def addNewScene(self):
+        self.scenes.append(Scene(self.ntracks))
 
