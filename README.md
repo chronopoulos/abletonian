@@ -11,7 +11,7 @@ To start Abletonian:
 
 >>> python main.py
 
-You should be presented with an interface containing scene buttons, clip buttons, and more.
+You should be presented with an interface containing scene buttons, clip buttons, and more:
 
 ![Screenshot](screenshot.png)
 
