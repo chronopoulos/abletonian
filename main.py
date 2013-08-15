@@ -11,6 +11,7 @@ from kivy.uix.popup import Popup
 from kivy.uix.togglebutton import ToggleButton
 from kivy.properties import NumericProperty
 from kivy.uix.textinput import TextInput
+from kivy.uix.filechooser import FileChooserListView 
 
 ################################
 
@@ -22,13 +23,40 @@ loopdir = '/home/chrono/music/samples/drum loops/'
 
 abletonian = Abletonian(4,4)
 
+"""
 abletonian.scenes[0].addMasterClip(loopdir+'120bpm_16b_808beat.wav')
 abletonian.scenes[0].addClip(loopdir+'120bpm_16b_808beat.wav', 1)
 abletonian.scenes[0].addClip(loopdir+'120bpm_16b_panningfifths.aif', 2)
 abletonian.scenes[0].addClip(loopdir+'120bpm_16b_pentatonicbells.wav', 3)
+"""
 
 
 #################################
+
+class FileLoader(BoxLayout):
+
+    def __init__(self, clipButton):
+        self.clipButton = clipButton
+        super(FileLoader, self).__init__(orientation='vertical')
+        self.fc = FileChooserListView(path='/home/chrono/Dropbox/abletonian/samples')
+        self.buttons = BoxLayout(orientation='horizontal', size_hint=(1,0.1))
+        self.buttons.add_widget(Button(text='Cancel', on_release=self.cancel))
+        self.buttons.add_widget(Button(text='Load', on_release=self.load))
+        super(FileLoader, self).add_widget(self.fc)
+        super(FileLoader, self).add_widget(self.buttons)
+
+    def cancel(self, button):
+        self.clipButton.popup.dismiss()
+
+    def load(self, button):
+        if len(self.fc.selection)>0:
+            if self.clipButton.trackIndex==0:
+                abletonian.scenes[self.clipButton.sceneIndex].addMasterClip(self.fc.selection[0])
+                self.clipButton.popup.dismiss()
+            else:
+                abletonian.scenes[self.clipButton.sceneIndex].addClip(self.fc.selection[0], self.clipButton.trackIndex)
+                self.clipButton.popup.dismiss()
+
 
 class ClipButton(Button):
 
@@ -36,16 +64,13 @@ class ClipButton(Button):
         super(ClipButton, self).__init__(text='load')
         self.trackIndex = trackIndex
         self.sceneIndex = sceneIndex
-        self.ti = TextInput(text='/home/chrono/music/samples/drum loops/', size_hint=(0.8,0.8), pos_hint={'x':0.1, 'y':0.1}, multiline=False)
-        self.ti.bind(on_text_validate=self.on_textInput)
-        self.pu = Popup(title='Scene %i, Track %i: Type path to file'%(self.sceneIndex, self.trackIndex), content=self.ti, size_hint=(0.8,0.2), pos_hint={'x':0.1, 'y':0.4})
+        #self.ti = TextInput(text='/home/chrono/music/samples/drum loops/', size_hint=(0.8,0.8), pos_hint={'x':0.1, 'y':0.1}, multiline=False)
+        #self.ti.bind(on_text_validate=self.on_textInput)
+        self.popup = Popup(title='Load Clip', content=FileLoader(self), size_hint=(0.8,0.8), pos_hint={'x':0.1, 'y':0.1})
 
     def on_press(self):
-        if self.state=='down':
-            print 'Down: ', self.trackIndex, self.sceneIndex
-            self.pu.open()
-        else:
-            print 'Up: ', self.trackIndex, self.sceneIndex
+        #print dir(self)
+        self.popup.open()
 
     def on_textInput(self, textinput):
         if self.trackIndex==0:
