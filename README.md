@@ -1,11 +1,11 @@
 abletonian
 ==========
 
-Abletonian is a free and open source alternative to Ableton Live's looping software. Still in early
-development, Abletonian aims to offer all the key features of Live, and then expand into new concepts like algorithmic
-composition and networked collaboration.
+Abletonian is a free and open source alternative to Ableton Live's looping software.
+Still in early development, Abletonian aims to offer all the key features of Live, and then expand into new concepts like algorithmic composition and networked collaboration.
 
-Abletonian depends on pyo for DSP, and Kivy for graphics. Make sure these are installed and working before attempting to use Abletonian.
+Abletonian depends on [pyo](https://code.google.com/p/pyo/) for DSP, and [Kivy](http://kivy.org/) for graphics.
+Make sure these are installed and working before attempting to use Abletonian.
 
 To start Abletonian:
 
