@@ -12,6 +12,9 @@ To start Abletonian:
 >>> python main.py
 
 You should be presented with an interface containing scene buttons, clip buttons, and more.
+
+![Screenshot](screenshot.png)
+
 To load a clip, click on a clip button and select the file to load.
 To launch a scene, click on its scene button.
 To switch to another scene, click on the new scene's button. The new scene will not start playing until the old scene completes.
